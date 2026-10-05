@@ -1,0 +1,142 @@
+TASK 3 - TERRAFORM + DOCKER EXECUTION LOG
+
+Environment
+-----------
+OS: Windows
+Docker: 29.8.1
+Terraform: 1.16.4
+Docker context: desktop-linux
+
+1. VERIFY TOOLS
+---------------
+Command:
+terraform --version
+
+Observed:
+Terraform v1.16.4
+on windows_amd64
+
+Command:
+docker --version
+
+Observed:
+Docker version 29.8.1
+
+Command:
+docker info
+
+Observed:
+Docker Engine running successfully.
+Server Version: 29.8.1
+Operating System: Docker Desktop (containerized)
+
+2. TERRAFORM INIT
+-----------------
+Command:
+terraform init
+
+Result:
+Terraform has been successfully initialized!
+
+3. TERRAFORM PLAN
+-----------------
+Command:
+terraform plan
+
+Important result:
+Plan: 2 to add, 0 to change, 0 to destroy.
+
+Resources planned:
+- docker_container.nginx
+- docker_image.nginx
+
+4. FIRST TERRAFORM APPLY ATTEMPT
+---------------------------------
+Command:
+terraform apply
+
+Result:
+Failed to start the container because host port 8080 was unavailable.
+
+Relevant error:
+ports are not available ... 0.0.0.0:8080
+bind: An attempt was made to access a socket in a way forbidden by its access permissions.
+
+Investigation:
+netstat -ano | findstr :8080
+
+Observed:
+TCP 0.0.0.0:8080 ... LISTENING 7284
+TCP [::]:8080 ... LISTENING 7284
+
+Process check:
+Get-Process -Id 7284
+
+Observed:
+java.exe
+
+5. FIX
+-------
+Changed the Terraform host port from 8080 to 8081.
+
+Final mapping:
+Host port 8081 -> Container port 80
+
+6. TERRAFORM APPLY
+------------------
+Command:
+terraform apply
+
+Result:
+Successful.
+
+Docker verification:
+docker ps
+
+Observed:
+terraform-nginx
+Up
+0.0.0.0:8081->80/tcp
+
+7. APPLICATION VERIFICATION
+---------------------------
+Opened:
+http://localhost:8081
+
+Result:
+Nginx "Welcome to nginx!" page displayed successfully.
+
+8. TERRAFORM STATE
+------------------
+Command:
+terraform state list
+
+Expected/observed managed resources:
+- docker_container.nginx
+- docker_image.nginx
+
+Command:
+terraform state show docker_container.nginx
+
+Important state values:
+name = "terraform-nginx"
+must_run = true
+start = true
+
+Port configuration:
+external = 8081
+internal = 80
+protocol = "tcp"
+
+9. TERRAFORM DESTROY
+--------------------
+Command:
+terraform destroy
+
+Result:
+Destroy complete! Resources: 2 destroyed.
+
+10. FINAL RESULT
+----------------
+Terraform successfully provisioned and managed a local Nginx Docker
+container and then destroyed the infrastructure using Terraform.
