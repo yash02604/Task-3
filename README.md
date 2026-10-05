@@ -78,14 +78,4 @@ terraform state
 terraform destroy
 ```
 
-## Interview Topics from the Task
 
-The task also asks preparation for:
-1. What is IaC?
-2. How does Terraform work?
-3. What is Terraform state file?
-4. Difference between apply and plan.
-5. What are Terraform providers?
-6. What is resource dependency?
-7. How do you handle secret variables?
-8. Explain the benefits of Terraform.
